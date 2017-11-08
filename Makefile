@@ -6,7 +6,7 @@ RUN_PARAMS=
 
 STD=-std=c++11
 
-LINKERS=
+LINKERS=-lpthread
 
 MAKE_EXEC=-o
 

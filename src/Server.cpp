@@ -20,23 +20,24 @@ class Server
 	public:
 		Server();
 
-		void getInformation();
-		bool setListenPort(int port);
 		bool startSocket();
 		bool startListen();
 		bool waitForConnection(Connection connection);
 
+		bool runInBackground(void *(*function)(void *), void *parameters);//Run a function in background (thread) (returns true if success creating thread)
+		bool runInBackground(void *(*function)(void *));
+
 		bool setMaxTryNumber(int number);
+		bool setListenPort(int port);
 
 		bool getInternalError();
-
+		void getInformation();
 
 	private:
 		
 		bool logEnabled;
 		bool listening;
 		bool canStartListen;
-
 
 		int port;
 		int sockfd;
@@ -173,6 +174,37 @@ bool Server::getInternalError()
 	}
 	if(sockfd<0)
 	{
+		return true;
+	}
+	return false;
+}
+
+bool Server::runInBackground( void *(*function)(void *), void *parameters )
+{
+	pthread_t thread;
+	if(pthread_create(&thread, NULL, function, parameters) != 0)
+	{
+		printf("ERROR: Failed to start running function in background\n");
+		return false;
+	}
+	else
+	{
+		pthread_detach(thread);
+		return true;
+	}
+}
+
+bool Server::runInBackground( void *(*function)(void *))
+{
+	pthread_t thread;
+	if(pthread_create(&thread, NULL, function, NULL) != 0)
+	{
+		printf("ERROR: Failed to start running function in background\n");
+		return false;
+	}
+	else
+	{
+		pthread_detach(thread);
 		return true;
 	}
 }
