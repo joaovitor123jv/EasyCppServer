@@ -1,25 +1,44 @@
 #include<cstdio>
 #include "src/Server.cpp"
 
-void *funcao(void *nothing)
+Server server;
+
+
+void *funcao(void *arg)
 {
+	Connection *connection = static_cast<Connection *>(arg);
+	//connection = (Connection *)arg;
+	std::string received;
 	while(true)
 	{
-		printf("asdhjskahdjksahdjksadas\n");
+		received = server.receiveData(*connection);
+		std::cout << "Data received: "<< received << std::endl;
+		if(received == "exit")
+		{
+			server.sendData("OK, closing connection", *connection);
+		}
+		else
+		{
+			server.sendData("This is the data that will be sent to connection", *connection);
+		}
 	}
 }
 
 int main()
 {
-	Connection connection;
-	Server server;
+	server.setListenPort(7420);
 	server.startSocket();
 	server.startListen();
 
 	while(true)
 	{
-		server.waitForConnection(connection);
-		server.runInBackground(funcao);
+		Connection connection;
+		server.waitForConnection(&connection);
+		//server.runInBackground(funcao, (void *)&connection);
+		server.runInBackground(funcao, &connection);
+
+		//std::cout<< server.receiveData(connection)<<std::endl;
+		//server.sendData("Servidor inicializado e funcionando", connection);
 		if(server.getInternalError())
 		{
 			printf(" Erro detectado !\n");

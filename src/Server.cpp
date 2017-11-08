@@ -1,7 +1,8 @@
 #include<cstdio>
 #include<iostream>
 #include<stdlib.h>
-#include<string.h>
+//#include<string.h>
+#include<string>
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netdb.h>
@@ -22,9 +23,10 @@ class Server
 
 		bool startSocket();
 		bool startListen();
-		bool waitForConnection(Connection connection);
+		bool waitForConnection(Connection *connection);
 
 		bool runInBackground(void *(*function)(void *), void *parameters);//Run a function in background (thread) (returns true if success creating thread)
+		bool runInBackground( void *(*function)(Connection *), Connection *connection);
 		bool runInBackground(void *(*function)(void *));
 
 		bool setMaxTryNumber(int number);
@@ -32,6 +34,9 @@ class Server
 
 		bool getInternalError();
 		void getInformation();
+
+		bool sendData(std::string data, Connection connection);
+		std::string receiveData(Connection connection);
 
 	private:
 		
@@ -45,6 +50,8 @@ class Server
 		int type;
 		int protocol;
 		int simultaneousListeners;
+
+		int bufferSize;
 
 		int maxTryNumber;
 		int trySleepTime;
@@ -69,6 +76,7 @@ void Server::getInformation()
 		std::cout<< "\tMax number of tries:"<< maxTryNumber <<std::endl;
 		std::cout<< "\tTime between tries:"<< trySleepTime <<std::endl;
 		std::cout<< "\tMax simultaneous listeners:"<< simultaneousListeners <<std::endl;
+		std::cout<< "\tBuffer Size:"<< bufferSize <<std::endl;
 }
 
 Server::Server()
@@ -88,8 +96,8 @@ Server::Server()
 	trySleepTime = 1;
 
 	simultaneousListeners = 5;
-
 	
+	bufferSize = 1024;//1024 Bytes by default
 
 	printf(" Server ready!\n");
 }
@@ -130,7 +138,7 @@ bool Server::startListen()
 	}
 }
 
-bool Server::waitForConnection(Connection conexao)
+bool Server::waitForConnection(Connection *conexao)
 {
 	if( !listening )
 	{
@@ -160,7 +168,7 @@ bool Server::waitForConnection(Connection conexao)
 			{
 				printf(" LOG: Client accepted successfully\n");
 			}
-			conexao = Connection(&clientAddr, clientSock);
+			*conexao = Connection(&clientAddr, clientSock);
 			return true;
 		}
 	}
@@ -207,4 +215,72 @@ bool Server::runInBackground( void *(*function)(void *))
 		pthread_detach(thread);
 		return true;
 	}
+}
+
+bool Server::runInBackground( void *(*function)(Connection *), Connection *connection)
+{
+	pthread_t thread;
+
+	if(pthread_create(&thread, NULL, (void *(*)(void*))function, (void *)connection) != 0)
+	{
+		printf("ERROR: Failed to start running function in background\n");
+		return false;
+	}
+	else
+	{
+		pthread_detach(thread);
+		return true;
+	}
+}
+
+bool Server::sendData(std::string data, Connection connection)
+{
+	if(connection.started())
+	{
+		if(write(connection.getDescriptor(), data.c_str(), data.length()+1) != data.length()+1)
+		{
+			if(logEnabled)
+			{
+				printf(" Failed to write all data to specific connection!\n");
+			}
+			return false;
+		}
+		else
+		{
+			if(logEnabled)
+			{
+				printf(" Data send to specific connection\n");
+			}
+			return true;
+		}
+	}
+	else
+	{
+		if(logEnabled)
+		{
+			printf("This connection wasn't started yet!\n");
+		}
+		return false;
+	}
+}
+
+std::string Server::receiveData(Connection connection)
+{
+	std::string response = "";
+	char *cstr = (char *)malloc(sizeof(char) * bufferSize);
+	if(cstr == NULL)
+	{
+		if(logEnabled)
+		{
+			printf("Failed to alloc memory to temporary pointer\n");
+		}
+		return response;
+	}
+
+	read(connection.getDescriptor(), cstr, bufferSize);
+	response.assign(cstr);
+	free(cstr);
+	cstr = NULL;
+
+	return response;
 }
