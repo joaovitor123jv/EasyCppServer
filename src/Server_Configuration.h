@@ -120,3 +120,14 @@ bool Server::setMaxTryNumber(int number)
 	this->maxTryNumber = number;
 	return true;
 }
+
+bool Server::setTimeBetweenTries(int number)
+{
+	this->trySleepTime = number;
+	return true;
+}
+
+bool Server::disableLogs()
+{
+	this->logEnabled = false;
+}

@@ -12,6 +12,15 @@
 #include<pthread.h>
 #include<unistd.h>
 
+/*
+	*Defaults:
+		*Logs enabled 
+		*Start listening on port 7440 
+		*TCP Server set (in future, there will be a way to change to another server types (like UDP))
+		*Number os max tries: 100
+		*Interval between tries: 1 second (minimum)
+*/
+
 
 #include "Connection.cpp"
 
@@ -23,20 +32,26 @@ class Server
 
 		bool startSocket();
 		bool startListen();
+		bool open();//showtcut to startSocket() and startListen() in order to run properly.
+		bool open(int port);//showtcut to startSocket() and startListen(), defining the "port" number in order to run properly.
 		bool waitForConnection(Connection *connection);
 
-		bool runInBackground(void *(*function)(void *), void *parameters);//Run a function in background (thread) (returns true if success creating thread)
-		bool runInBackground( void *(*function)(Connection *), Connection *connection);
-		bool runInBackground(void *(*function)(void *));
+		//All "runInBackground" methods returns true if succeed to create a thread with "function", and false otherwise.
+		bool runInBackground(void *(*function)(void *), void *parameters);// Runs "function" in background, passes "*parameters" as argument (function may return "void *" and receive "void *")
+		bool runInBackground(void *(*function)(Connection *), Connection *connection);// Runs a function that returns "void *" and receives "Connection *", passing *connection it as argument.
+		bool runInBackground(void *(*function)(void *));// Runs "function" in background, no parameters (function may return "void *" and receive "void *")
 
-		bool setMaxTryNumber(int number);
-		bool setListenPort(int port);
+		bool disableLogs();//Turn showing logs OFF
 
-		bool getInternalError();
-		void getInformation();
+		bool setMaxTryNumber(int number);//Define the number os max tries (when setting up server, trying to do bind...)
+		bool setTimeBetweenTries(int timeInSeconds);//Change the interval in seconds, between tries
+		bool setListenPort(int port);//Define the port to listen
 
-		bool sendData(std::string data, Connection connection);
-		std::string receiveData(Connection connection);
+		bool getInternalError();//Check for some errors (almost useless by now)
+		void getInformation();//Returns Data of the server created
+
+		bool sendData(std::string data, Connection connection);//Send a string of data to client, identified by "connection" (received from waitForConnection())
+		std::string receiveData(Connection connection);//Receive data from client connected (connection), and convert it in string
 
 	private:
 		
@@ -99,7 +114,7 @@ Server::Server()
 	
 	bufferSize = 1024;//1024 Bytes by default
 
-	printf(" Server ready!\n");
+	//printf(" Server ready!\n");
 }
 
 bool Server::startListen()
@@ -283,4 +298,42 @@ std::string Server::receiveData(Connection connection)
 	cstr = NULL;
 
 	return response;
+}
+
+bool Server::open()
+{
+	if(this->startSocket())
+	{
+		if(this->startListen())
+		{
+			if(logEnabled)
+			{
+				printf(" Listening on port %d\n", port);
+			}
+			return true;
+		}
+		else
+		{
+			if(logEnabled)
+			{
+				printf(" Failed to start listening on %d port\n", port);
+				printf(" \tPlease check if %d port is currently being used in your system\n", port);
+			}
+			return false;
+		}
+	}
+	else
+	{
+		if(logEnabled)
+		{
+			printf(" Failed to start socket, can't start Listening\n");
+		}
+		return false;
+	}
+}
+
+bool Server::open(int port)
+{
+	this->setListenPort(port);
+	return this->open();
 }

@@ -3,12 +3,11 @@
 
 Server server;
 
-
 void *funcao(void *arg)
 {
 	Connection *connection = static_cast<Connection *>(arg);
-	//connection = (Connection *)arg;
 	std::string received;
+
 	while(true)
 	{
 		received = server.receiveData(*connection);
@@ -26,25 +25,13 @@ void *funcao(void *arg)
 
 int main()
 {
-	server.setListenPort(7420);
-	server.startSocket();
-	server.startListen();
+	server.open(8450);//Defines the port to be listenes, open the socket, start listen and bind a TCP Server
 
 	while(true)
 	{
 		Connection connection;
 		server.waitForConnection(&connection);
-		//server.runInBackground(funcao, (void *)&connection);
 		server.runInBackground(funcao, &connection);
-
-		//std::cout<< server.receiveData(connection)<<std::endl;
-		//server.sendData("Servidor inicializado e funcionando", connection);
-		if(server.getInternalError())
-		{
-			printf(" Erro detectado !\n");
-			server.getInformation();
-			break;
-		}
 	}
 	return 0;
 }

@@ -16,35 +16,35 @@ EXE_NAME=server
 
 SOURCES_FOLDER=src
 
-all: clean $(EXE_NAME)
-	@echo "Compilação terminada com sucesso"
+all: $(EXE_NAME)
+	@echo "Build with success"
 
 build: $(EXE_NAME)
-	@echo "Compilação terminada com sucesso"
+	@echo "End of building"
 
 run: $(EXE_NAME)
 	./$(EXE_NAME) $(RUN_PARAMS)
 
 
 Connection.o:
-	@echo "Gerando Connection.o"
+	@echo "Generating Connection.o"
 	@$(CC) $(GENERATE_OBJ) $(SOURCES_FOLDER)/Connection.cpp
 
 Server.o: Connection.o
-	@echo "Gerando Server.o"
+	@echo "Generating Server.o"
 	@$(CC) $(GENERATE_OBJ) $(SOURCES_FOLDER)/Server.cpp
 
-$(EXE_NAME): Server.o Connection.o
-	@echo "Compilando arquivo principal"
+$(EXE_NAME): CLEAN_BEFORE_BUILD Server.o Connection.o
+	@echo "Building main file $(MAIN_FILE)"
 	@$(CC) $(MAIN_FILE) $(MAKE_EXEC) $(EXE_NAME) $(LINKERS)
 
 
 clean:
-	@echo "Removendo Server.o"
-	@rm Server.o
-	@echo "Removendo Connection.o"
-	@rm Connection.o
-	@echo "Removendo server"
-	@rm server
+	@echo "Removing Server.o"
+	@rm -f Server.o
+	@echo "Removing Connection.o"
+	@rm -f Connection.o
 
-
+CLEAN_BEFORE_BUILD:
+	@echo "Removing file from before building"
+	@rm -f $(EXE_NAME)
