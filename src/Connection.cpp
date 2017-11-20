@@ -15,11 +15,12 @@ class Connection
 {
 	public:
 		Connection();
+		Connection(void *arg);
 		Connection(struct sockaddr_in *address, int clientFileDescriptor);
 
 		int getDescriptor();
 		bool started();
-		//struct sockaddr_in getAddress();
+		sockaddr_in getAddress();
 
 	private:
 		struct sockaddr_in address;
@@ -32,6 +33,14 @@ Connection::Connection(struct sockaddr_in *address, int clientFileDescriptor)
 {
 	this->address = *address;
 	this->fileDescriptor = clientFileDescriptor;
+	this->initialized = true;
+}
+
+Connection::Connection(void *arg)
+{
+	Connection *connection = static_cast<Connection *>(arg);	
+	this->address = connection->getAddress();
+	this->fileDescriptor = connection->getDescriptor();
 	this->initialized = true;
 }
 
@@ -52,4 +61,9 @@ int Connection::getDescriptor()
 bool Connection::started()
 {
 	return this->initialized;
+}
+
+sockaddr_in Connection::getAddress()
+{
+	return this->address;
 }

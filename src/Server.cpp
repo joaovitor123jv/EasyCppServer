@@ -12,6 +12,7 @@
 #include<pthread.h>
 #include<unistd.h>
 
+
 /*
 	*Defaults:
 		*Logs enabled 
@@ -53,8 +54,10 @@ class Server
 		bool sendData(std::string data, Connection connection);//Send a string of data to client, identified by "connection" (received from waitForConnection())
 		std::string receiveData(Connection connection);//Receive data from client connected (connection), and convert it in string
 
+
 	private:
-		
+
+
 		bool logEnabled;
 		bool listening;
 		bool canStartListen;
@@ -65,9 +68,7 @@ class Server
 		int type;
 		int protocol;
 		int simultaneousListeners;
-
 		int bufferSize;
-
 		int maxTryNumber;
 		int trySleepTime;
 
@@ -337,3 +338,4 @@ bool Server::open(int port)
 	this->setListenPort(port);
 	return this->open();
 }
+

@@ -36,7 +36,7 @@ Server.o: Connection.o
 
 $(EXE_NAME): CLEAN_BEFORE_BUILD Server.o Connection.o
 	@echo "Building main file $(MAIN_FILE)"
-	@$(CC) $(MAIN_FILE) $(MAKE_EXEC) $(EXE_NAME) $(LINKERS)
+	@$(CC) $(MAIN_FILE) $(MAKE_EXEC) $(EXE_NAME) $(LINKERS) -I $(SOURCES_FOLDER)
 
 
 clean:
