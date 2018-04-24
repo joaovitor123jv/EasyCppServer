@@ -1,50 +1,61 @@
+#Define the settings for your project here, these settings must be used till the end of project
+
+#Compiler
 CC=g++
 
-MAIN_FILE=main.cpp
+MAIN_FILE=Main.cpp
 
-RUN_PARAMS=
+MAIN_EXE_NAME=server
 
-STD=-std=c++11
+MAIN_EXE_DEPENDENCIES=Server.o Connection.o
 
-LINKERS=-lpthread
+FRAMEWORK_LIB_LINKERS=-Isrc/lib/
 
-MAKE_EXEC=-o
+MAIN_EXE_LINKERS=-lpthread $(FRAMEWORK_LIB_LINKERS)
 
-GENERATE_OBJ=-c
+WARNINGS=-Wall
+#WARNINGS=
 
-EXE_NAME=server
+OPTIMIZATION=
+#OPTIMIZATION=-03
 
-SOURCES_FOLDER=src
+STD=
+#STD=-std=c++11
 
-all: $(EXE_NAME)
-	@echo "Build with success"
+.PHONY: clean all debug run
+#default operations definitions
+all: clean $(MAIN_EXE_NAME)
 
-build: $(EXE_NAME)
-	@echo "End of building"
+debug: all /usr/bin/valgrind
+	/usr/bin/valgrind ./$(MAIN_EXE_NAME)
 
-run: $(EXE_NAME)
-	./$(EXE_NAME) $(RUN_PARAMS)
-
-
-Connection.o:
-	@echo "Generating Connection.o"
-	@$(CC) $(GENERATE_OBJ) $(SOURCES_FOLDER)/Connection.cpp
-
-Server.o: Connection.o
-	@echo "Generating Server.o"
-	@$(CC) $(GENERATE_OBJ) $(SOURCES_FOLDER)/Server.cpp
-
-$(EXE_NAME): CLEAN_BEFORE_BUILD Server.o Connection.o
-	@echo "Building main file $(MAIN_FILE)"
-	@$(CC) $(MAIN_FILE) $(MAKE_EXEC) $(EXE_NAME) $(LINKERS) -I $(SOURCES_FOLDER)
-
+run: $(MAIN_EXE_NAME)
+	@echo "Start running $^"
+	@./$^
 
 clean:
+	@echo "Starting project cleaning"
+	@echo "Removing main object file"
+	@rm -f $(MAIN_FILE:.cpp=.o)
+	@echo "Removing $(MAIN_EXE_NAME)"
+	@rm -f $(MAIN_EXE_NAME)
 	@echo "Removing Server.o"
 	@rm -f Server.o
 	@echo "Removing Connection.o"
 	@rm -f Connection.o
 
-CLEAN_BEFORE_BUILD:
-	@echo "Removing file from before building"
-	@rm -f $(EXE_NAME)
+#Main File Compile Section
+$(MAIN_FILE): Server.o
+
+$(MAIN_EXE_NAME): $(MAIN_FILE) $(MAIN_EXE_DEPENDENCIES)
+	@echo "Generating $(MAIN_EXE_NAME) on ./bin directory"
+	$(CC) $(STD) $(WARNINGS) $(OPTIMIZATION) $^ -o $@ $(MAIN_EXE_LINKERS) 
+	#$(MAIN_EXE_DEPENDENCIES)
+
+
+
+Server.o: src/lib/Server.cpp
+	$(CC) $(STD) $(WARNINGS) $(OPTIMIZATION) -c $^ -o $@ $(MAIN_EXE_LINKERS)
+
+Connection.o: src/lib/Connection.cpp
+	$(CC) $(STD) $(WARNINGS) $(OPTIMIZATION) -c $^ -o $@ $(MAIN_EXE_LINKERS)

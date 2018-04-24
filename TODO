@@ -1,0 +1,14 @@
+
+Todo:
+  ☐ Item
+
+
+User:
+  ☐ Criar funções especificadas em User.hpp, no arquivo User.cpp (src/lib/User.hpp)
+
+BancoDeDados:
+  ☐ Criar e especificar funções para trabalhar com banco de dados, de modo facilitado (semelhante ao "OperacoesBanco" de outro projeto)
+
+StringTool:
+  ☐ Criar funcoes para adaptar strings de modo otimizado para servidores (não lendo strings até o fim pra saber se é maior e coisas do tipo
+  ☐ Criar funcoes para adaptar strings (no lugar de ', colocar \' e coisas do tipo) 

@@ -18,4 +18,6 @@ How to use:
 
 
 
-Ps: Testing and running on Arch Linux, be free to open issues.
+Ps: Testing and running on Arch Linux and Ubuntu 16.04, be free to open issues.
+Ps2: This code is not made to run on any Windows OS.
+Ps3: This code have absolutely no warranty, use at your own risk.
